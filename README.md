@@ -58,6 +58,83 @@ https://your-username.github.io/nginx-dashboard/
 
 ---
 
+📄 user-loading.md（完整内容，一次性复制）
+markdown
+# 用户默认加载页面说明
+
+本说明文件用于解释每个用户登录后默认加载的页面是如何控制的，适用于本项目的 `index.html` 运维门户结构。
+
+---
+
+## 🧠 控制逻辑概述
+
+在 `index.html` 的 JavaScript 中，用户登录成功后会执行以下代码：
+
+```javascript
+loadPage(users[username].pages[0]);
+这表示：
+
+每个用户拥有一个页面权限列表：users[username].pages
+
+登录后会自动加载该列表中的第一个页面（索引为 [0]）
+
+页面通过 <iframe> 加载，文件名由页面配置决定
+
+👥 用户配置示例
+javascript
+const users = {
+  admin: {
+    password: "admin123",
+    pages: ["nginx", "dashboard", "certbot", "portainer", "extra"]
+  },
+  li: {
+    password: "nginxlover",
+    pages: ["nginx", "dashboard"]
+  },
+  guest: {
+    password: "readonly",
+    pages: ["dashboard"]
+  }
+};
+用户名	默认加载页面	权限页面列表
+admin	nginx.html	nginx, dashboard, certbot, portainer, extra
+li	nginx.html	nginx, dashboard
+guest	dashboard.html	dashboard
+✅ 如何修改默认加载页面
+只需调整 pages 数组的顺序即可。例如：
+
+javascript
+li: {
+  password: "nginxlover",
+  pages: ["dashboard", "nginx"]
+}
+这样 li 登录后将默认加载 dashboard.html。
+
+🔧 可选扩展功能（建议）
+如需更智能的默认加载行为，可考虑：
+
+使用 localStorage 记住上次访问页面
+
+为每个用户添加 defaultPage 字段，例如：
+
+javascript
+li: {
+  password: "nginxlover",
+  pages: ["nginx", "dashboard"],
+  defaultPage: "dashboard"
+}
+然后修改加载逻辑为：
+
+javascript
+const defaultPage = users[username].defaultPage || users[username].pages[0];
+loadPage(defaultPage);
+📌 注意事项
+所有页面文件必须存在于项目根目录
+
+页面文件名需与配置一致（如 nginx.html）
+
+页面权限控制仅在前端实现，非安全隔离
+
 ## 📄 许可协议
 
 本项目为学习和个人使用而设计，无需授权即可使用和修改。
